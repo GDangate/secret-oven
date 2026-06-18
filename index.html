@@ -302,17 +302,27 @@
         }
 
         .menu-card:hover {
-            border-radius: 65px 15px 65px 15px; 
+            border-radius: 25px 25px 25px 25px; 
             transform: translateY(-3px);
             box-shadow: 0 9px 0 var(--cookie-brown);
             background-color: #fff;
         }
 
+        /* CARD SELECTION POP ANIMATION EFFECT */
         .menu-card.selected {
             background-color: #fffaf8;
             border-color: var(--cookie-brown);
             background-image: radial-gradient(var(--banner-pink-main) 15%, transparent 16%);
             background-size: 16px 16px;
+            animation: cardSelectPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            box-shadow: 0 4px 0 var(--cookie-brown);
+            transform: translateY(2px);
+        }
+
+        @keyframes cardSelectPop {
+            0% { transform: scale(1) translateY(0); }
+            50% { transform: scale(1.05) translateY(-5px); box-shadow: 0 12px 0 var(--cookie-brown); }
+            100% { transform: scale(1) translateY(2px); box-shadow: 0 4px 0 var(--cookie-brown); }
         }
 
         .menu-card::before {
@@ -598,6 +608,7 @@
             box-shadow: 4px 4px 0 var(--cookie-brown);
             max-width: 150px;
             margin-top: 5px;
+            text-align: center;
         }
 
         .qr-image {
@@ -605,6 +616,14 @@
             height: auto;
             display: block;
             border-radius: 6px;
+            margin-bottom: 5px;
+        }
+
+        .contact-info-text {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--cookie-brown);
+            margin-top: 5px;
         }
 
         /* --- ANIMATION KEYFRAMES --- */
@@ -684,7 +703,7 @@
 
                 <div class="menu-card" onclick="toggleSelection(this, 330)" data-price="330">
                     <div class="product-frame">
-                        <img class="product-image" src="https://imgur.com/Y0LbNat.png" alt="Dubai Chewy Mochi 6pcs">
+                        <img class="product-image" src="https://imgur.com/J0EHL1Y.png" alt="Dubai Chewy Mochi 6pcs">
                     </div>
                     <div>
                         <div class="item-name">Dubai Chewy Mochi (6-Piece Pack)</div> 
@@ -720,7 +739,7 @@
 
                 <div class="menu-card" onclick="toggleSelection(this, 35)" data-price="35">
                     <div class="product-frame">
-                        <img class="product-image" src="https://imgur.com/u6eeT7Q.png" alt="Individual Brookie Piece">
+                        <img class="product-image" src="https://imgur.com/g5LfU0b.png" alt="Individual Brookie Piece">
                     </div>
                     <div>
                         <div class="item-name">Signature Brookie (Individual Piece)</div>
@@ -877,6 +896,7 @@
                 
                 <div class="qr-frame">
                     <img class="qr-image" src="https://imgur.com/mqrv90Y.png" alt="Secret Oven Facebook Profile QR Code">
+                    <div class="contact-info-text">📞 0963 199 3945</div>
                 </div>
             </div>
         </section>
@@ -897,61 +917,9 @@
             daySelect.appendChild(opt);
         }
 
-        function toggleSelection(card, price) {
-            if(card.classList.contains('selected') && window.event.target.closest('.quantity-selector')) {
-                return;
-            }
-            card.classList.toggle('selected');
-            const qtySpan = card.querySelector('.qty-val');
-            if (card.classList.contains('selected')) { qtySpan.textContent = "1"; }
-            calculateTotal();
-        }
-
-        function changeQty(button, amount) {
-            const qtySpan = button.parentElement.querySelector('.qty-val');
-            let currentQty = parseInt(qtySpan.textContent);
-            currentQty += amount;
-            if (currentQty < 1) {
-                const card = button.closest('.menu-card');
-                card.classList.remove('selected');
-            } else {
-                qtySpan.textContent = currentQty;
-            }
-            calculateTotal();
-        }
-
-        function calculateTotal() {
-            let subtotal = 0;
-            let selectedItemsCount = 0;
-            const cards = document.querySelectorAll('.menu-grid .menu-card');
-
-            cards.forEach(card => {
-                if (card.classList.contains('selected')) {
-                    selectedItemsCount++;
-                    const price = parseInt(card.getAttribute('data-price'));
-                    const qty = parseInt(card.querySelector('.qty-val').textContent);
-                    subtotal += (price * qty);
-                }
-            });
-
-            const emptyNotice = document.getElementById('empty-notice');
-            const invoiceDetails = document.getElementById('invoice-details');
-
-            if (selectedItemsCount > 0) {
-                emptyNotice.style.display = 'none';
-                invoiceDetails.style.display = 'block';
-                document.getElementById('subtotal-val').textContent = subtotal;
-                document.getElementById('grand-val').textContent = subtotal;
-            } else {
-                emptyNotice.style.display = 'block';
-                invoiceDetails.style.display = 'none';
-            }
-        }
-
         document.getElementById('orderForm').addEventListener('submit', function(event) {
             event.preventDefault(); 
             
-            // 1. Gather Selected Items Information
             let orderItemsText = "";
             let uniqueItemCount = 0;
             const cards = document.querySelectorAll('.menu-grid .menu-card');
@@ -970,7 +938,6 @@
                 return;
             }
 
-            // 2. Read Delivery Inputs & Validate Minute Field
             const customerName = document.getElementById('custName').value.toUpperCase();
             const shippingAddress = document.getElementById('custAddr').value.toUpperCase();
             const dMonth = document.getElementById('deliveryMonth').value.toUpperCase();
@@ -987,7 +954,6 @@
                 return;
             }
 
-            // Simple calendar safety block for 2026 scheduling
             const monthNames = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
             const currentObj = new Date();
             if (dYear === "2026" && monthNames.indexOf(dMonth) < currentObj.getMonth()) {
@@ -995,7 +961,6 @@
                 return;
             }
 
-            // 3. Format Structured Capitalized Manifest Output Text
             const cleanSummaryManifest = 
 `--------------------------------------------------
           SECRET OVEN - PRE-ORDER MANIFEST        
@@ -1018,12 +983,10 @@ ${orderItemsText}
 TOTAL BASKET VALUE: PHP ${grandTotal}.00
 --------------------------------------------------`;
 
-            // 4. Output the Manifest Directly to the bottom UI frame
             document.getElementById('manifestTextarea').value = cleanSummaryManifest;
             document.getElementById('manifestOutputBlock').style.display = "flex";
             document.getElementById('manifestTextarea').select();
 
-            // 5. Submit Payload Structure over to Formspree Gateway
             const sidebar = document.getElementById('sidebarContainer');
             sidebar.classList.add('baking-pop');
             sidebar.addEventListener('animationend', () => { sidebar.classList.remove('baking-pop'); }, {once: true});
@@ -1078,6 +1041,57 @@ TOTAL BASKET VALUE: PHP ${grandTotal}.00
                 feedbackBtn.disabled = false;
             });
         });
+
+        function toggleSelection(card, price) {
+            if(card.classList.contains('selected') && window.event.target.closest('.quantity-selector')) {
+                return;
+            }
+            card.classList.toggle('selected');
+            const qtySpan = card.querySelector('.qty-val');
+            if (card.classList.contains('selected')) { qtySpan.textContent = "1"; }
+            calculateTotal();
+        }
+
+        function changeQty(button, amount) {
+            const qtySpan = button.parentElement.querySelector('.qty-val');
+            let currentQty = parseInt(qtySpan.textContent);
+            currentQty += amount;
+            if (currentQty < 1) {
+                const card = button.closest('.menu-card');
+                card.classList.remove('selected');
+            } else {
+                qtySpan.textContent = currentQty;
+            }
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            let subtotal = 0;
+            let selectedItemsCount = 0;
+            const cards = document.querySelectorAll('.menu-grid .menu-card');
+
+            cards.forEach(card => {
+                if (card.classList.contains('selected')) {
+                    selectedItemsCount++;
+                    const price = parseInt(card.getAttribute('data-price'));
+                    const qty = parseInt(card.querySelector('.qty-val').textContent);
+                    subtotal += (price * qty);
+                }
+            });
+
+            const emptyNotice = document.getElementById('empty-notice');
+            const invoiceDetails = document.getElementById('invoice-details');
+
+            if (selectedItemsCount > 0) {
+                emptyNotice.style.display = 'none';
+                invoiceDetails.style.display = 'block';
+                document.getElementById('subtotal-val').textContent = subtotal;
+                document.getElementById('grand-val').textContent = subtotal;
+            } else {
+                emptyNotice.style.display = 'block';
+                invoiceDetails.style.display = 'none';
+            }
+        }
     </script>
 </body>
 </html>
